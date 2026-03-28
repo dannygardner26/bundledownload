@@ -1,0 +1,5 @@
+{
+  "name": "dannys-stack",
+  "description": "Danny's preferred developer tools",
+  "tools": ["node", "git", "gh", "claude-code", "vercel", "supabase", "wrangler", "tabby"]
+}

@@ -1,0 +1,5 @@
+{
+  "name": "cloud-ops",
+  "description": "Cloud platform CLIs",
+  "tools": ["git", "gh", "aws", "az", "gcloud"]
+}

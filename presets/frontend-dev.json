@@ -1,0 +1,5 @@
+{
+  "name": "frontend-dev",
+  "description": "Frontend development essentials",
+  "tools": ["node", "git", "gh", "vercel", "wrangler"]
+}
