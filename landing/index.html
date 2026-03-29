@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BundleDownload — One command. Every tool.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #faf8f5;
+      --fg: #1a1a1a;
+      --red: #e63946;
+      --dim: #8a8a8a;
+      --border: #e0ddd8;
+      --code-bg: #1a1a1a;
+      --code-fg: #f0ece6;
+      --card-bg: #ffffff;
+      --serif: 'Instrument Serif', 'Newsreader', Georgia, serif;
+      --mono: 'DM Mono', 'Courier New', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--serif);
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ---- NAV ---- */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--fg);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--fg); }
+
+    /* ---- HERO ---- */
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 48px 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .hero-text h1 {
+      font-family: var(--serif);
+      font-size: clamp(48px, 6vw, 80px);
+      line-height: 0.95;
+      font-weight: 400;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+    }
+    .hero-text h1 em {
+      font-style: italic;
+      color: var(--red);
+    }
+    .hero-text .subtitle {
+      font-family: var(--mono);
+      font-size: 15px;
+      color: var(--dim);
+      line-height: 1.7;
+      max-width: 420px;
+      margin-bottom: 40px;
+    }
+
+    /* Install commands */
+    .install-cmds {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .install-cmd {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .install-cmd .os-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      width: 80px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .install-cmd code {
+      font-family: var(--mono);
+      font-size: 13px;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 10px 16px;
+      border-radius: 6px;
+      flex: 1;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s;
+    }
+    .install-cmd code:hover {
+      transform: translateY(-1px);
+    }
+    .install-cmd code::after {
+      content: 'copy';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .install-cmd code:hover::after { opacity: 1; }
+    .install-cmd code.copied::after {
+      content: 'copied!';
+      color: var(--red);
+      opacity: 1;
+    }
+
+    /* Terminal mockup */
+    .hero-terminal {
+      background: var(--code-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.15);
+      transform: perspective(1000px) rotateY(-2deg) rotateX(1deg);
+      transition: transform 0.4s;
+    }
+    .hero-terminal:hover {
+      transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+    }
+    .terminal-bar {
+      display: flex;
+      gap: 6px;
+      padding: 12px 16px;
+      background: #2a2a2a;
+    }
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .terminal-dot.r { background: #ff5f57; }
+    .terminal-dot.y { background: #febc2e; }
+    .terminal-dot.g { background: #28c840; }
+    .terminal-body {
+      padding: 20px 24px 28px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.9;
+      color: #ccc;
+    }
+    .terminal-body .prompt { color: #888; }
+    .terminal-body .cmd { color: #f0ece6; }
+    .terminal-body .ok { color: #28c840; }
+    .terminal-body .info { color: #888; }
+    .terminal-body .hl { color: var(--red); }
+    .terminal-body .brand { color: #f0ece6; font-weight: 500; }
+
+    .line {
+      opacity: 0;
+      animation: fadeInLine 0.3s ease forwards;
+    }
+    .line:nth-child(1)  { animation-delay: 0.2s; }
+    .line:nth-child(2)  { animation-delay: 0.6s; }
+    .line:nth-child(3)  { animation-delay: 0.9s; }
+    .line:nth-child(4)  { animation-delay: 1.1s; }
+    .line:nth-child(5)  { animation-delay: 1.5s; }
+    .line:nth-child(6)  { animation-delay: 1.7s; }
+    .line:nth-child(7)  { animation-delay: 1.9s; }
+    .line:nth-child(8)  { animation-delay: 2.1s; }
+    .line:nth-child(9)  { animation-delay: 2.3s; }
+    .line:nth-child(10) { animation-delay: 2.5s; }
+    .line:nth-child(11) { animation-delay: 2.8s; }
+    .line:nth-child(12) { animation-delay: 3.0s; }
+    .line:nth-child(13) { animation-delay: 3.2s; }
+    .line:nth-child(14) { animation-delay: 3.5s; }
+    .line:nth-child(15) { animation-delay: 3.8s; }
+
+    @keyframes fadeInLine {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---- DIVIDER ---- */
+    .divider {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 48px;
+    }
+    .divider hr {
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ---- TOOLS SECTION ---- */
+    .tools-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 48px;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 48px;
+    }
+    .section-header h2 {
+      font-family: var(--serif);
+      font-size: 42px;
+      font-weight: 400;
+      letter-spacing: -1px;
+    }
+    .section-header .count {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--dim);
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .tool-card {
+      background: var(--card-bg);
+      padding: 28px 24px;
+      transition: background 0.2s;
+      cursor: default;
+    }
+    .tool-card:hover {
+      background: #f5f2ed;
+    }
+    .tool-card .tool-name {
+      font-family: var(--serif);
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+    .tool-card .tool-id {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--dim);
+    }
+    .tool-card .tool-phase {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--red);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 12px;
+    }
+
+    /* ---- PRESETS ---- */
+    .presets-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 48px;
+    }
+    .presets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .preset-card {
+      border: 1px solid var(--border);
+      padding: 32px;
+      background: var(--card-bg);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .preset-card:hover {
+      border-color: var(--fg);
+      transform: translateY(-2px);
+    }
+    .preset-card h3 {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .preset-card .preset-desc {
+      font-family: var(--serif);
+      font-size: 15px;
+      color: var(--dim);
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+    .preset-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .preset-tools span {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--fg);
+    }
+    .preset-cmd {
+      margin-top: 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--dim);
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .preset-cmd code {
+      color: var(--fg);
+    }
+
+    /* ---- HOW IT WORKS ---- */
+    .how-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 48px;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px;
+      margin-top: 48px;
+    }
+    .step {
+      position: relative;
+    }
+    .step-number {
+      font-family: var(--serif);
+      font-size: 72px;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .step h3 {
+      font-family: var(--serif);
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .step p {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--dim);
+      line-height: 1.6;
+    }
+
+    /* ---- CONFIG SECTION ---- */
+    .config-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 48px;
+    }
+    .config-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .config-text h2 {
+      font-family: var(--serif);
+      font-size: 42px;
+      font-weight: 400;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+    .config-text p {
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--dim);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .config-code {
+      background: var(--code-bg);
+      border-radius: 12px;
+      padding: 28px 32px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--code-fg);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+    }
+    .config-code .key { color: var(--red); }
+    .config-code .str { color: #a8d8a8; }
+    .config-code .punc { color: #888; }
+
+    /* ---- FOOTER ---- */
+    footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+    }
+    footer .left {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--dim);
+    }
+    footer .right {
+      display: flex;
+      gap: 24px;
+    }
+    footer a {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    footer a:hover { color: var(--red); }
+
+    /* ---- CTA BANNER ---- */
+    .cta-banner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 48px;
+      text-align: center;
+    }
+    .cta-banner h2 {
+      font-family: var(--serif);
+      font-size: 56px;
+      font-weight: 400;
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
+    }
+    .cta-banner h2 em {
+      font-style: italic;
+      color: var(--red);
+    }
+    .cta-banner code {
+      font-family: var(--mono);
+      font-size: 16px;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      padding: 14px 28px;
+      border-radius: 8px;
+      display: inline-block;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .cta-banner code:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; gap: 40px; padding: 40px 24px; }
+      .tools-grid { grid-template-columns: repeat(2, 1fr); }
+      .presets-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; gap: 32px; }
+      .config-layout { grid-template-columns: 1fr; }
+      nav { padding: 16px 24px; }
+      .tools-section, .presets-section, .how-section, .config-section, .cta-banner { padding: 48px 24px; }
+      .section-header h2, .config-text h2 { font-size: 32px; }
+      .hero-text h1 { font-size: 48px; }
+    }
+    @media (max-width: 600px) {
+      .tools-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .install-cmd .os-label { width: 60px; font-size: 10px; }
+      .install-cmd code { font-size: 11px; padding: 8px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="#" class="nav-logo">BundleDownload</a>
+    <ul class="nav-links">
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#presets">Presets</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="https://github.com/danny/bundledownload">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-text">
+      <h1>One command.<br><em>Every tool.</em></h1>
+      <p class="subtitle">
+        Stop spending your first day installing things.
+        BundleDownload installs your entire dev stack
+        with a single command. Pick a preset or build your own.
+      </p>
+      <div class="install-cmds">
+        <div class="install-cmd">
+          <span class="os-label">Mac / Linux</span>
+          <code onclick="copyCmd(this)">curl -fsSL bundledownload.dev/install.sh | bash</code>
+        </div>
+        <div class="install-cmd">
+          <span class="os-label">Windows</span>
+          <code onclick="copyCmd(this)">irm bundledownload.dev/install.ps1 | iex</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot r"></div>
+        <div class="terminal-dot y"></div>
+        <div class="terminal-dot g"></div>
+      </div>
+      <div class="terminal-body">
+        <div class="line"><span class="prompt">$</span> <span class="cmd">curl -fsSL bundledownload.dev/install.sh | bash</span></div>
+        <div class="line">&nbsp;</div>
+        <div class="line"><span class="brand">BundleDownload v1.0.0</span></div>
+        <div class="line"><span class="info">Detected: macOS 14.2 (arm64) &mdash; Homebrew available</span></div>
+        <div class="line"><span class="info">Loading preset: </span><span class="hl">dannys-stack</span><span class="info"> (8 tools)</span></div>
+        <div class="line">&nbsp;</div>
+        <div class="line"><span class="ok">[ok]</span> Git 2.43.0 &mdash; already installed</div>
+        <div class="line"><span class="ok">[ok]</span> Node.js v22.0.0 &mdash; installed via fnm <span class="info">(3s)</span></div>
+        <div class="line"><span class="ok">[ok]</span> GitHub CLI 2.45.0 &mdash; installed <span class="info">(2s)</span></div>
+        <div class="line"><span class="ok">[ok]</span> Vercel CLI 33.0 &mdash; installed <span class="info">(4s)</span></div>
+        <div class="line"><span class="ok">[ok]</span> Wrangler 3.28 &mdash; installed <span class="info">(3s)</span></div>
+        <div class="line"><span class="ok">[ok]</span> Supabase CLI 1.140 &mdash; installed <span class="info">(2s)</span></div>
+        <div class="line"><span class="ok">[ok]</span> Claude Code 1.0 &mdash; installed <span class="info">(1s)</span></div>
+        <div class="line"><span class="ok">[ok]</span> Tabby &mdash; installed <span class="info">(5s)</span></div>
+        <div class="line">&nbsp;</div>
+        <div class="line"><span class="brand">Done!</span> <span class="info">7 installed, 1 already present. </span><span class="hl">Ready to code.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- TOOLS -->
+  <section class="tools-section" id="tools">
+    <div class="section-header">
+      <h2>Supported tools</h2>
+      <span class="count">12 tools, 3 platforms</span>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-name">Git</div>
+        <div class="tool-id">git</div>
+        <div class="tool-phase">Foundation</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Node.js</div>
+        <div class="tool-id">node (via fnm)</div>
+        <div class="tool-phase">Foundation</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">GitHub CLI</div>
+        <div class="tool-id">gh</div>
+        <div class="tool-phase">Standalone</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Claude Code</div>
+        <div class="tool-id">claude-code</div>
+        <div class="tool-phase">Standalone</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Vercel CLI</div>
+        <div class="tool-id">vercel</div>
+        <div class="tool-phase">NPM Tool</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Wrangler</div>
+        <div class="tool-id">wrangler</div>
+        <div class="tool-phase">NPM Tool</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Supabase CLI</div>
+        <div class="tool-id">supabase</div>
+        <div class="tool-phase">NPM Tool</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">AWS CLI</div>
+        <div class="tool-id">aws</div>
+        <div class="tool-phase">Standalone</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Azure CLI</div>
+        <div class="tool-id">az</div>
+        <div class="tool-phase">Standalone</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Google Cloud CLI</div>
+        <div class="tool-id">gcloud</div>
+        <div class="tool-phase">Standalone</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">Tabby</div>
+        <div class="tool-id">tabby</div>
+        <div class="tool-phase">App</div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-name">WhisperFlow</div>
+        <div class="tool-id">whisperflow</div>
+        <div class="tool-phase">App</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="how">
+    <div class="section-header">
+      <h2>How it works</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Run one command</h3>
+        <p>Paste the install command into your terminal. The script detects your OS, architecture, and package manager automatically.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Pick your tools</h3>
+        <p>Use the interactive picker or load a preset. Dependencies are resolved automatically &mdash; Node installs before npm-based tools.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Start building</h3>
+        <p>Everything installs in parallel phases. Already-installed tools are skipped. You get a summary with next steps for auth setup.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- PRESETS -->
+  <section class="presets-section" id="presets">
+    <div class="section-header">
+      <h2>Presets</h2>
+      <span class="count">or bring your own config</span>
+    </div>
+    <div class="presets-grid">
+      <div class="preset-card">
+        <h3>dannys-stack</h3>
+        <div class="preset-desc">The essentials for full-stack web development</div>
+        <div class="preset-tools">
+          <span>node</span><span>git</span><span>gh</span><span>claude-code</span>
+          <span>vercel</span><span>supabase</span><span>wrangler</span><span>tabby</span>
+        </div>
+        <div class="preset-cmd">$ <code>curl ... | bash -s -- --preset dannys-stack</code></div>
+      </div>
+      <div class="preset-card">
+        <h3>frontend-dev</h3>
+        <div class="preset-desc">Frontend development essentials</div>
+        <div class="preset-tools">
+          <span>node</span><span>git</span><span>gh</span><span>vercel</span><span>wrangler</span>
+        </div>
+        <div class="preset-cmd">$ <code>curl ... | bash -s -- --preset frontend-dev</code></div>
+      </div>
+      <div class="preset-card">
+        <h3>cloud-ops</h3>
+        <div class="preset-desc">Cloud platform CLIs for infrastructure work</div>
+        <div class="preset-tools">
+          <span>git</span><span>gh</span><span>aws</span><span>az</span><span>gcloud</span>
+        </div>
+        <div class="preset-cmd">$ <code>curl ... | bash -s -- --preset cloud-ops</code></div>
+      </div>
+      <div class="preset-card">
+        <h3>full-stack</h3>
+        <div class="preset-desc">Everything. All 12 tools.</div>
+        <div class="preset-tools">
+          <span>git</span><span>node</span><span>gh</span><span>gcloud</span><span>az</span><span>aws</span>
+          <span>vercel</span><span>supabase</span><span>wrangler</span><span>claude-code</span>
+          <span>whisperflow</span><span>tabby</span>
+        </div>
+        <div class="preset-cmd">$ <code>curl ... | bash -s -- --preset full-stack</code></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- CONFIG -->
+  <section class="config-section">
+    <div class="config-layout">
+      <div class="config-text">
+        <h2>Share your stack</h2>
+        <p>Drop a <code style="background:var(--bg);border:1px solid var(--border);padding:2px 6px;border-radius:3px;font-family:var(--mono);font-size:13px;">bundledownload.json</code> in your repo. New team members run one command and get your exact toolset.</p>
+        <p>Works with local files, URLs, or auto-detected from the current directory.</p>
+      </div>
+      <div class="config-code">
+        <span class="punc">{</span><br>
+        &nbsp;&nbsp;<span class="key">"name"</span><span class="punc">:</span> <span class="str">"my-team"</span><span class="punc">,</span><br>
+        &nbsp;&nbsp;<span class="key">"tools"</span><span class="punc">:</span> <span class="punc">[</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"node"</span><span class="punc">,</span> <span class="str">"git"</span><span class="punc">,</span> <span class="str">"gh"</span><span class="punc">,</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"vercel"</span><span class="punc">,</span> <span class="str">"supabase"</span><span class="punc">,</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"claude-code"</span><br>
+        &nbsp;&nbsp;<span class="punc">],</span><br>
+        &nbsp;&nbsp;<span class="key">"node_version"</span><span class="punc">:</span> <span class="str">"lts"</span><br>
+        <span class="punc">}</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- CTA -->
+  <section class="cta-banner">
+    <h2>Stop installing.<br><em>Start building.</em></h2>
+    <code onclick="copyCmd(this)">curl -fsSL bundledownload.dev/install.sh | bash</code>
+  </section>
+
+  <footer>
+    <div class="left">BundleDownload v1.0.0</div>
+    <div class="right">
+      <a href="https://github.com/danny/bundledownload">GitHub</a>
+      <a href="#tools">Tools</a>
+      <a href="#presets">Presets</a>
+    </div>
+  </footer>
+
+  <script>
+    function copyCmd(el) {
+      const text = el.textContent.replace('copy', '').trim();
+      navigator.clipboard.writeText(text).then(() => {
+        el.classList.add('copied');
+        setTimeout(() => el.classList.remove('copied'), 1500);
+      });
+    }
+
+    // Intersection Observer for scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.tool-card, .preset-card, .step').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(el);
+    });
+  </script>
+
+</body>
+</html>
