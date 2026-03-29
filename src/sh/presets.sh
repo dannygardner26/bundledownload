@@ -40,15 +40,15 @@ load_config_file() {
     return 1
   fi
 
-  # Parse JSON — try jq first, fall back to python3
+  # Parse JSON — try jq first, then python3, then basic grep fallback
   local tools_str
   if command_exists jq; then
     tools_str=$(echo "$json" | jq -r '.tools[]' 2>/dev/null | tr '\n' ' ')
-  elif command_exists python3; then
+  elif python3 -c "import json" 2>/dev/null; then
     tools_str=$(echo "$json" | python3 -c "import sys,json; print(' '.join(json.load(sys.stdin)['tools']))" 2>/dev/null)
   else
-    log_error "Need jq or python3 to parse JSON config files"
-    return 1
+    # Fallback: basic grep/sed parser for simple JSON arrays
+    tools_str=$(echo "$json" | grep -o '"tools"\s*:\s*\[.*\]' | grep -oP '"\K[a-z][-a-z0-9]*(?=")' | tr '\n' ' ')
   fi
 
   IFS=' ' read -ra SELECTED_TOOLS <<< "$tools_str"
@@ -56,7 +56,7 @@ load_config_file() {
   if command_exists jq; then
     config_name=$(echo "$json" | jq -r '.name // "custom"')
   else
-    config_name="custom"
+    config_name=$(echo "$json" | grep -oP '"name"\s*:\s*"\K[^"]+' 2>/dev/null || echo "custom")
   fi
   log_info "Loaded config: $config_name (${#SELECTED_TOOLS[@]} tools)"
   return 0

@@ -27,6 +27,12 @@ detect_os() {
         BD_PKG_MGR="unknown"
       fi
       ;;
+    MINGW*|MSYS*|CYGWIN*)
+      BD_OS="windows"
+      BD_DISTRO="windows"
+      BD_PKG_MGR="winget"
+      log_warn "Detected Windows via Git Bash. For best results, use install.ps1 in PowerShell."
+      ;;
     *)
       log_error "Unsupported OS: $uname_s"
       exit 1
