@@ -22,13 +22,17 @@ $TOOL_NAME = @{
 }
 
 $TOOL_VERSION_CMD = @{
-    "git" = "git --version"; "node" = "node --version"; "gh" = "gh --version"
-    "gcloud" = "gcloud --version 2>`$null | Select-Object -First 1"
-    "az" = "az --version 2>`$null | Select-Object -First 1"
-    "aws" = "aws --version"; "vercel" = "vercel --version 2>`$null"
-    "supabase" = "supabase --version"; "wrangler" = "wrangler --version 2>`$null"
-    "claude-code" = "claude --version 2>`$null"
-    "whisperflow" = "whisperflow --version 2>`$null"
+    "git" = "git --version"
+    "node" = "node --version"
+    "gh" = "gh --version"
+    "gcloud" = "gcloud --version"
+    "az" = "az --version"
+    "aws" = "aws --version"
+    "vercel" = "vercel --version"
+    "supabase" = "supabase --version"
+    "wrangler" = "wrangler --version"
+    "claude-code" = "claude --version"
+    "whisperflow" = "whisperflow --version"
     "tabby" = ""
 }
 
@@ -50,8 +54,8 @@ function Test-ToolInstalled {
         return $null
     }
     try {
-        $result = Invoke-Expression $cmd 2>$null
-        if ($LASTEXITCODE -eq 0 -or $result) { return $result }
+        $result = Invoke-Expression "$cmd 2>`$null" 2>$null
+        if ($result) { return ($result | Select-Object -First 1) }
     } catch {}
     return $null
 }

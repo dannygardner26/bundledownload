@@ -67,23 +67,28 @@ function Show-InteractivePicker {
 
 function Write-ProgressStart {
     param([string]$Id)
-    Write-Host " [..] $($TOOL_NAME[$Id]) — installing..." -ForegroundColor Yellow
+    $name = $TOOL_NAME[$Id]
+    Write-Host " [..] $name - installing..." -ForegroundColor Yellow
 }
 
 function Write-ProgressDone {
     param([string]$Id, [string]$Version = "installed")
-    # Overwrite previous line
+    $name = $TOOL_NAME[$Id]
     [Console]::SetCursorPosition(0, [Console]::CursorTop - 1)
-    Write-Host (" [ok] {0} — {1}" -f $TOOL_NAME[$Id], $Version).PadRight(60) -ForegroundColor Green
+    $line = " [ok] $name - $Version"
+    Write-Host $line.PadRight(60) -ForegroundColor Green
 }
 
 function Write-ProgressSkip {
     param([string]$Id, [string]$Version)
-    Write-Host " [ok] $($TOOL_NAME[$Id]) $Version — already installed" -ForegroundColor Green
+    $name = $TOOL_NAME[$Id]
+    Write-Host " [ok] $name $Version - already installed" -ForegroundColor Green
 }
 
 function Write-ProgressFail {
     param([string]$Id, [string]$Err = "failed")
+    $name = $TOOL_NAME[$Id]
     [Console]::SetCursorPosition(0, [Console]::CursorTop - 1)
-    Write-Host (" [!!] {0} — {1}" -f $TOOL_NAME[$Id], $Err).PadRight(60) -ForegroundColor Red
+    $line = " [!!] $name - $Err"
+    Write-Host $line.PadRight(60) -ForegroundColor Red
 }

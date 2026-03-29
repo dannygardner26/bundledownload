@@ -21,7 +21,7 @@ function Print-SystemInfo {
     Write-Host ""
     Write-Host " BundleDownload v$BUNDLEDOWNLOAD_VERSION" -ForegroundColor White
     Write-Host " Detected: Windows $($script:BD_WINVER) ($($script:BD_ARCH))" -NoNewline -ForegroundColor DarkGray
-    if ($script:BD_HAS_WINGET) { Write-Host " — winget available" -ForegroundColor DarkGray -NoNewline }
-    if ($script:BD_HAS_SCOOP)  { Write-Host " — scoop available" -ForegroundColor DarkGray -NoNewline }
+    if ($script:BD_HAS_WINGET) { Write-Host " -winget available" -ForegroundColor DarkGray -NoNewline }
+    if ($script:BD_HAS_SCOOP)  { Write-Host " -scoop available" -ForegroundColor DarkGray -NoNewline }
     Write-Host "`n"
 }
