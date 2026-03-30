@@ -1,0 +1,5 @@
+{
+  "name": "ai-builder",
+  "description": "AI-powered development — agents, image gen, instant deploy",
+  "tools": ["node", "git", "gh", "claude-code", "gcloud", "vercel", "supabase", "wrangler", "whisperflow"]
+}

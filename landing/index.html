@@ -215,6 +215,168 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* ---- TOOL CONSTELLATION ---- */
+    .constellation {
+      position: relative;
+      width: 100%;
+      margin: 0 auto;
+      padding: 60px 0;
+      height: 360px;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 50%, rgba(230,57,70,0.04) 0%, transparent 70%),
+        url('assets/hero-abstract-bg.png') center/cover no-repeat;
+      background-blend-mode: soft-light;
+      mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%),
+                  linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+    }
+    .constellation-track {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      height: 100%;
+      width: max-content;
+      animation: drift 50s linear infinite;
+    }
+    .constellation-track:hover { animation-play-state: paused; }
+
+    @keyframes drift {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    .c-node {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      animation: floatY 6s ease-in-out infinite;
+    }
+    .c-node:nth-child(even) { animation-duration: 7s; animation-delay: -2s; }
+    .c-node:nth-child(3n)   { animation-duration: 5s; animation-delay: -4s; }
+    .c-node:nth-child(5n)   { animation-duration: 8s; animation-delay: -1s; }
+
+    @keyframes floatY {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-18px); }
+    }
+
+    .c-block {
+      width: 88px;
+      height: 88px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: default;
+    }
+    .c-block img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+    .c-block:hover {
+      transform: scale(1.12);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+    }
+    .c-block.dark {
+      background: var(--code-bg);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .c-block.dark img { filter: brightness(0) invert(1); }
+    .c-block.light {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .c-block.accent {
+      background: var(--red);
+      box-shadow: 0 4px 20px rgba(230,57,70,0.25);
+    }
+    .c-block.accent img { filter: brightness(0) invert(1); }
+
+    .c-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    /* Decorative connector dots between nodes */
+    .c-dot {
+      flex-shrink: 0;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--border);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    .c-dot:nth-child(even) { animation-delay: -1.5s; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50%      { opacity: 1; }
+    }
+
+    /* Phase labels floating above some nodes */
+    .c-phase {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--red);
+      opacity: 0.7;
+    }
+
+    @media (max-width: 900px) {
+      .constellation { height: 260px; padding: 40px 0; }
+      .c-block { width: 68px; height: 68px; border-radius: 16px; font-size: 11px; }
+      .constellation-track { gap: 28px; }
+    }
+    @media (max-width: 600px) {
+      .constellation { height: 200px; padding: 30px 0; }
+      .c-block { width: 56px; height: 56px; border-radius: 14px; font-size: 10px; }
+      .c-label { font-size: 9px; }
+      .constellation-track { gap: 20px; }
+    }
+
+    /* ---- FLOATING BG ICONS ---- */
+    .floating-icons {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .floating-icons img {
+      position: absolute;
+      opacity: 0.04;
+      width: 60px;
+      height: 60px;
+      animation: floatBg 20s ease-in-out infinite;
+    }
+    .floating-icons img:nth-child(1) { top: 8%; left: 5%; animation-duration: 22s; }
+    .floating-icons img:nth-child(2) { top: 25%; right: 8%; animation-duration: 18s; animation-delay: -4s; }
+    .floating-icons img:nth-child(3) { top: 55%; left: 12%; animation-duration: 25s; animation-delay: -8s; }
+    .floating-icons img:nth-child(4) { top: 70%; right: 15%; animation-duration: 20s; animation-delay: -2s; }
+    .floating-icons img:nth-child(5) { top: 40%; left: 85%; animation-duration: 23s; animation-delay: -6s; }
+    .floating-icons img:nth-child(6) { top: 15%; left: 60%; animation-duration: 19s; animation-delay: -10s; width: 40px; height: 40px; }
+    .floating-icons img:nth-child(7) { top: 80%; left: 45%; animation-duration: 24s; animation-delay: -3s; width: 50px; height: 50px; }
+    .floating-icons img:nth-child(8) { top: 35%; left: 30%; animation-duration: 21s; animation-delay: -7s; width: 45px; height: 45px; }
+
+    @keyframes floatBg {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      33%      { transform: translateY(-15px) rotate(3deg); }
+      66%      { transform: translateY(10px) rotate(-2deg); }
+    }
+
+    .has-floating { position: relative; }
+
     /* ---- DIVIDER ---- */
     .divider {
       max-width: 1200px;
@@ -524,11 +686,11 @@
       <div class="install-cmds">
         <div class="install-cmd">
           <span class="os-label">Mac / Linux</span>
-          <code onclick="copyCmd(this)">curl -fsSL bundledownload.dev/install.sh | bash</code>
+          <code onclick="copyCmd(this)">curl -fsSL bundledownload.dannygardner.me/install.sh | bash</code>
         </div>
         <div class="install-cmd">
           <span class="os-label">Windows</span>
-          <code onclick="copyCmd(this)">irm bundledownload.dev/install.ps1 | iex</code>
+          <code onclick="copyCmd(this)">irm bundledownload.dannygardner.me/install.ps1 | iex</code>
         </div>
       </div>
     </div>
@@ -540,7 +702,7 @@
         <div class="terminal-dot g"></div>
       </div>
       <div class="terminal-body">
-        <div class="line"><span class="prompt">$</span> <span class="cmd">curl -fsSL bundledownload.dev/install.sh | bash</span></div>
+        <div class="line"><span class="prompt">$</span> <span class="cmd">curl -fsSL bundledownload.dannygardner.me/install.sh | bash</span></div>
         <div class="line">&nbsp;</div>
         <div class="line"><span class="brand">BundleDownload v1.0.0</span></div>
         <div class="line"><span class="info">Detected: macOS 14.2 (arm64) &mdash; Homebrew available</span></div>
@@ -559,6 +721,61 @@
       </div>
     </div>
   </section>
+
+  <div class="constellation">
+    <div class="constellation-track">
+      <!-- Set 1 -->
+      <div class="c-node"><span class="c-phase">foundation</span><div class="c-block dark"><img src="assets/icons/git.svg" alt="Git"></div><span class="c-label">Git</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block accent"><img src="assets/icons/node.svg" alt="Node.js"></div><span class="c-label">Node.js</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block light"><img src="assets/icons/github.svg" alt="GitHub CLI"></div><span class="c-label">GitHub CLI</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><span class="c-phase">npm</span><div class="c-block dark"><img src="assets/icons/vercel.svg" alt="Vercel"></div><span class="c-label">Vercel</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block accent"><img src="assets/icons/cloudflare.svg" alt="Wrangler"></div><span class="c-label">Wrangler</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block light"><img src="assets/icons/supabase.svg" alt="Supabase"></div><span class="c-label">Supabase</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><span class="c-phase">cloud</span><div class="c-block dark"><img src="assets/icons/aws.svg" alt="AWS"></div><span class="c-label">AWS CLI</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block light"><img src="assets/icons/azure.svg" alt="Azure"></div><span class="c-label">Azure CLI</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block accent"><img src="assets/icons/googlecloud.svg" alt="Google Cloud"></div><span class="c-label">Google Cloud</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><span class="c-phase">apps</span><div class="c-block dark"><img src="assets/icons/anthropic.svg" alt="Claude Code"></div><span class="c-label">Claude Code</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block light"><img src="assets/icons/tabby.svg" alt="Tabby"></div><span class="c-label">Tabby</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block dark"><img src="assets/icons/whisperflow.svg" alt="WhisperFlow"></div><span class="c-label">WhisperFlow</span></div>
+
+      <!-- Set 2 (duplicate for seamless loop) -->
+      <span class="c-dot"></span>
+      <div class="c-node"><span class="c-phase">foundation</span><div class="c-block dark"><img src="assets/icons/git.svg" alt="Git"></div><span class="c-label">Git</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block accent"><img src="assets/icons/node.svg" alt="Node.js"></div><span class="c-label">Node.js</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block light"><img src="assets/icons/github.svg" alt="GitHub CLI"></div><span class="c-label">GitHub CLI</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><span class="c-phase">npm</span><div class="c-block dark"><img src="assets/icons/vercel.svg" alt="Vercel"></div><span class="c-label">Vercel</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block accent"><img src="assets/icons/cloudflare.svg" alt="Wrangler"></div><span class="c-label">Wrangler</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block light"><img src="assets/icons/supabase.svg" alt="Supabase"></div><span class="c-label">Supabase</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><span class="c-phase">cloud</span><div class="c-block dark"><img src="assets/icons/aws.svg" alt="AWS"></div><span class="c-label">AWS CLI</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block light"><img src="assets/icons/azure.svg" alt="Azure"></div><span class="c-label">Azure CLI</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block accent"><img src="assets/icons/googlecloud.svg" alt="Google Cloud"></div><span class="c-label">Google Cloud</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><span class="c-phase">apps</span><div class="c-block dark"><img src="assets/icons/anthropic.svg" alt="Claude Code"></div><span class="c-label">Claude Code</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block light"><img src="assets/icons/tabby.svg" alt="Tabby"></div><span class="c-label">Tabby</span></div>
+      <span class="c-dot"></span>
+      <div class="c-node"><div class="c-block dark"><img src="assets/icons/whisperflow.svg" alt="WhisperFlow"></div><span class="c-label">WhisperFlow</span></div>
+    </div>
+  </div>
 
   <div class="divider"><hr></div>
 
@@ -635,7 +852,17 @@
   <div class="divider"><hr></div>
 
   <!-- HOW IT WORKS -->
-  <section class="how-section" id="how">
+  <section class="how-section has-floating" id="how">
+    <div class="floating-icons">
+      <img src="assets/icons/git.svg" alt="">
+      <img src="assets/icons/node.svg" alt="">
+      <img src="assets/icons/vercel.svg" alt="">
+      <img src="assets/icons/cloudflare.svg" alt="">
+      <img src="assets/icons/supabase.svg" alt="">
+      <img src="assets/icons/aws.svg" alt="">
+      <img src="assets/icons/anthropic.svg" alt="">
+      <img src="assets/icons/googlecloud.svg" alt="">
+    </div>
     <div class="section-header">
       <h2>How it works</h2>
     </div>
@@ -732,9 +959,16 @@
   <div class="divider"><hr></div>
 
   <!-- CTA -->
-  <section class="cta-banner">
+  <section class="cta-banner has-floating">
+    <div class="floating-icons">
+      <img src="assets/icons/github.svg" alt="">
+      <img src="assets/icons/azure.svg" alt="">
+      <img src="assets/icons/node.svg" alt="">
+      <img src="assets/icons/vercel.svg" alt="">
+      <img src="assets/icons/anthropic.svg" alt="">
+    </div>
     <h2>Stop installing.<br><em>Start building.</em></h2>
-    <code onclick="copyCmd(this)">curl -fsSL bundledownload.dev/install.sh | bash</code>
+    <code onclick="copyCmd(this)">curl -fsSL bundledownload.dannygardner.me/install.sh | bash</code>
   </section>
 
   <footer>
@@ -771,6 +1005,7 @@
       el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
       observer.observe(el);
     });
+
   </script>
 
 </body>
