@@ -2,13 +2,14 @@
 
 # Built-in presets (embedded so curl|bash works without extra downloads)
 declare -A BUILTIN_PRESETS=(
-  [dannys-stack]="node git gh claude-code vercel supabase wrangler tabby"
-  [frontend-dev]="node git gh vercel wrangler"
-  [cloud-ops]="git gh aws az gcloud"
-  [full-stack]="git node gh gcloud az aws vercel supabase wrangler claude-code whisperflow tabby"
+  [dannys-stack]="node git gh claude-code vercel supabase cloudflare tabby"
+  [ai-builder]="node git gh claude-code gcloud vercel supabase cloudflare whisperflow"
+  [frontend-dev]="node git gh vercel cloudflare"
+  [cloud-ops]="git gh aws az gcloud terraform kubectl docker"
+  [full-stack]="git node python java bun rust cpp gh gcloud az aws vercel cloudflare supabase docker terraform kubectl claude-code whisperflow tabby"
 )
 
-BUILTIN_PRESET_NAMES=("dannys-stack" "frontend-dev" "cloud-ops" "full-stack")
+BUILTIN_PRESET_NAMES=("dannys-stack" "ai-builder" "frontend-dev" "cloud-ops" "full-stack")
 
 # Load tools from a preset name or config file.
 # Sets SELECTED_TOOLS array.

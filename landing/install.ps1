@@ -39,40 +39,39 @@ function Print-SystemInfo {
 }
 # Tool Registry for Windows
 
-$ALL_TOOL_IDS = @("git", "node", "gh", "gcloud", "az", "aws", "vercel", "supabase", "wrangler", "claude-code", "whisperflow", "tabby")
+$ALL_TOOL_IDS = @("git", "node", "python", "java", "bun", "rust", "cpp", "gh", "gcloud", "az", "aws", "vercel", "cloudflare", "supabase", "docker", "terraform", "kubectl", "claude-code", "whisperflow", "tabby")
 
 $TOOL_PHASE = @{
-    "git" = 1; "node" = 1
-    "vercel" = 2; "wrangler" = 2; "supabase" = 2
-    "gh" = 3; "aws" = 3; "az" = 3; "gcloud" = 3; "claude-code" = 3
+    "git" = 1; "node" = 1; "python" = 1; "java" = 1; "bun" = 1; "rust" = 1; "cpp" = 1
+    "vercel" = 2; "cloudflare" = 2; "supabase" = 2
+    "gh" = 3; "aws" = 3; "az" = 3; "gcloud" = 3; "claude-code" = 3; "docker" = 3; "terraform" = 3; "kubectl" = 3
     "tabby" = 4; "whisperflow" = 4
 }
 
 $TOOL_DEPS = @{
-    "vercel"  = @("node")
-    "wrangler" = @("node")
+    "vercel"     = @("node")
+    "cloudflare" = @("node")
+    "kubectl"    = @("docker")
 }
 
 $TOOL_NAME = @{
-    "git" = "Git"; "node" = "Node.js (via fnm)"; "gh" = "GitHub CLI"
-    "gcloud" = "Google Cloud CLI"; "az" = "Azure CLI"; "aws" = "AWS CLI"
-    "vercel" = "Vercel CLI"; "supabase" = "Supabase CLI"; "wrangler" = "Cloudflare Wrangler"
-    "claude-code" = "Claude Code"; "whisperflow" = "WhisperFlow"; "tabby" = "Tabby Terminal"
+    "git" = "Git"; "node" = "Node.js (via fnm)"; "python" = "Python 3"; "java" = "Java (OpenJDK)"
+    "bun" = "Bun"; "rust" = "Rust (rustup)"; "cpp" = "C/C++ Build Tools"
+    "gh" = "GitHub CLI"; "gcloud" = "Google Cloud CLI"; "az" = "Azure CLI"; "aws" = "AWS CLI"
+    "vercel" = "Vercel CLI"; "supabase" = "Supabase CLI"; "cloudflare" = "Cloudflare CLI"
+    "claude-code" = "Claude Code"; "docker" = "Docker"; "terraform" = "Terraform"; "kubectl" = "kubectl"
+    "whisperflow" = "WhisperFlow"; "tabby" = "Tabby Terminal"
 }
 
 $TOOL_VERSION_CMD = @{
-    "git" = "git --version"
-    "node" = "node --version"
-    "gh" = "gh --version"
-    "gcloud" = "gcloud --version"
-    "az" = "az --version"
-    "aws" = "aws --version"
-    "vercel" = "vercel --version"
-    "supabase" = "supabase --version"
-    "wrangler" = "wrangler --version"
-    "claude-code" = "claude --version"
-    "whisperflow" = "whisperflow --version"
-    "tabby" = ""
+    "git" = "git --version"; "node" = "node --version"; "python" = "python --version"
+    "java" = "java --version"; "bun" = "bun --version"; "rust" = "rustc --version"
+    "cpp" = "gcc --version"; "gh" = "gh --version"; "gcloud" = "gcloud --version"
+    "az" = "az --version"; "aws" = "aws --version"; "vercel" = "vercel --version"
+    "supabase" = "supabase --version"; "cloudflare" = "wrangler --version"
+    "claude-code" = "claude --version"; "docker" = "docker --version"
+    "terraform" = "terraform --version"; "kubectl" = "kubectl version --client"
+    "whisperflow" = "whisperflow --version"; "tabby" = ""
 }
 
 function Test-ToolInstalled {
@@ -133,8 +132,16 @@ function Install-Tool {
                 npm install -g supabase
             }
         }
-        "wrangler"    { npm install -g wrangler }
+        "cloudflare"  { npm install -g wrangler }
         "claude-code" { Invoke-Expression "& { $(Invoke-RestMethod https://claude.ai/install.ps1) }" }
+        "python"      { winget install --id Python.Python.3.12 -e --accept-source-agreements --accept-package-agreements }
+        "java"        { winget install --id Microsoft.OpenJDK.21 -e --accept-source-agreements --accept-package-agreements }
+        "bun"         { powershell -c "irm bun.sh/install.ps1 | iex" }
+        "rust"        { winget install --id Rustlang.Rustup -e --accept-source-agreements --accept-package-agreements }
+        "cpp"         { winget install --id Microsoft.VisualStudio.2022.BuildTools -e --accept-source-agreements --accept-package-agreements --override "--passive --add Microsoft.VisualStudio.Workload.VCTools" }
+        "docker"      { winget install --id Docker.DockerDesktop -e --accept-source-agreements --accept-package-agreements }
+        "terraform"   { winget install --id Hashicorp.Terraform -e --accept-source-agreements --accept-package-agreements }
+        "kubectl"     { winget install --id Kubernetes.kubectl -e --accept-source-agreements --accept-package-agreements }
         "whisperflow" { pip install whisperflow }
         "tabby"       { winget install --id Eugeny.Tabby -e --accept-source-agreements --accept-package-agreements }
         default       { Write-Err "Unknown tool: $Id"; return $false }
@@ -144,10 +151,11 @@ function Install-Tool {
 # Preset System
 
 $BUILTIN_PRESETS = @{
-    "dannys-stack" = @("node", "git", "gh", "claude-code", "vercel", "supabase", "wrangler", "tabby")
-    "frontend-dev" = @("node", "git", "gh", "vercel", "wrangler")
-    "cloud-ops"    = @("git", "gh", "aws", "az", "gcloud")
-    "full-stack"   = @("git", "node", "gh", "gcloud", "az", "aws", "vercel", "supabase", "wrangler", "claude-code", "whisperflow", "tabby")
+    "dannys-stack" = @("node", "git", "gh", "claude-code", "vercel", "supabase", "cloudflare", "tabby")
+    "ai-builder"   = @("node", "git", "gh", "claude-code", "gcloud", "vercel", "supabase", "cloudflare", "whisperflow")
+    "frontend-dev" = @("node", "git", "gh", "vercel", "cloudflare")
+    "cloud-ops"    = @("git", "gh", "aws", "az", "gcloud", "terraform", "kubectl", "docker")
+    "full-stack"   = @("git", "node", "python", "java", "bun", "rust", "cpp", "gh", "gcloud", "az", "aws", "vercel", "cloudflare", "supabase", "docker", "terraform", "kubectl", "claude-code", "whisperflow", "tabby")
 }
 
 $script:SELECTED_TOOLS = @()

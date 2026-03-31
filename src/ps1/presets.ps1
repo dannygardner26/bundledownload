@@ -1,10 +1,11 @@
 # Preset System
 
 $BUILTIN_PRESETS = @{
-    "dannys-stack" = @("node", "git", "gh", "claude-code", "vercel", "supabase", "wrangler", "tabby")
-    "frontend-dev" = @("node", "git", "gh", "vercel", "wrangler")
-    "cloud-ops"    = @("git", "gh", "aws", "az", "gcloud")
-    "full-stack"   = @("git", "node", "gh", "gcloud", "az", "aws", "vercel", "supabase", "wrangler", "claude-code", "whisperflow", "tabby")
+    "dannys-stack" = @("node", "git", "gh", "claude-code", "vercel", "supabase", "cloudflare", "tabby")
+    "ai-builder"   = @("node", "git", "gh", "claude-code", "gcloud", "vercel", "supabase", "cloudflare", "whisperflow")
+    "frontend-dev" = @("node", "git", "gh", "vercel", "cloudflare")
+    "cloud-ops"    = @("git", "gh", "aws", "az", "gcloud", "terraform", "kubectl", "docker")
+    "full-stack"   = @("git", "node", "python", "java", "bun", "rust", "cpp", "gh", "gcloud", "az", "aws", "vercel", "cloudflare", "supabase", "docker", "terraform", "kubectl", "claude-code", "whisperflow", "tabby")
 }
 
 $script:SELECTED_TOOLS = @()

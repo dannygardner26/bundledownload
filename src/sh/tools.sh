@@ -2,34 +2,43 @@
 # Each tool is defined by a set of variables: TOOL_<ID>_*
 
 # All tool IDs in display order
-ALL_TOOL_IDS=(git node gh gcloud az aws vercel supabase wrangler claude-code whisperflow tabby)
+ALL_TOOL_IDS=(git node python java bun rust cpp gh gcloud az aws vercel cloudflare supabase docker terraform kubectl claude-code whisperflow tabby)
 
 # Phase assignments (1=foundations, 2=npm-tools, 3=standalone, 4=apps)
 declare -A TOOL_PHASE=(
-  [git]=1 [node]=1
-  [vercel]=2 [wrangler]=2 [supabase]=2
-  [gh]=3 [aws]=3 [az]=3 [gcloud]=3 [claude-code]=3
+  [git]=1 [node]=1 [python]=1 [java]=1 [bun]=1 [rust]=1 [cpp]=1
+  [vercel]=2 [cloudflare]=2 [supabase]=2
+  [gh]=3 [aws]=3 [az]=3 [gcloud]=3 [claude-code]=3 [docker]=3 [terraform]=3 [kubectl]=3
   [tabby]=4 [whisperflow]=4
 )
 
 # Dependencies (tool ID -> space-separated dependency IDs)
 declare -A TOOL_DEPS=(
   [vercel]="node"
-  [wrangler]="node"
+  [cloudflare]="node"
+  [kubectl]="docker"
 )
 
 # Display names
 declare -A TOOL_NAME=(
   [git]="Git"
   [node]="Node.js (via fnm)"
+  [python]="Python 3"
+  [java]="Java (OpenJDK)"
+  [bun]="Bun"
+  [rust]="Rust (rustup)"
+  [cpp]="C/C++ Build Tools"
   [gh]="GitHub CLI"
   [gcloud]="Google Cloud CLI"
   [az]="Azure CLI"
   [aws]="AWS CLI"
   [vercel]="Vercel CLI"
   [supabase]="Supabase CLI"
-  [wrangler]="Cloudflare Wrangler"
+  [cloudflare]="Cloudflare CLI"
   [claude-code]="Claude Code"
+  [docker]="Docker"
+  [terraform]="Terraform"
+  [kubectl]="kubectl"
   [whisperflow]="WhisperFlow"
   [tabby]="Tabby Terminal"
 )
@@ -38,14 +47,22 @@ declare -A TOOL_NAME=(
 declare -A TOOL_VERSION_CMD=(
   [git]="git --version"
   [node]="node --version"
+  [python]="python3 --version"
+  [java]="java --version 2>&1 | head -1"
+  [bun]="bun --version"
+  [rust]="rustc --version"
+  [cpp]="gcc --version 2>&1 | head -1 || clang --version 2>&1 | head -1"
   [gh]="gh --version"
   [gcloud]="gcloud --version 2>/dev/null | head -1"
   [az]="az --version 2>/dev/null | head -1"
   [aws]="aws --version"
   [vercel]="vercel --version 2>/dev/null"
   [supabase]="supabase --version"
-  [wrangler]="wrangler --version 2>/dev/null"
+  [cloudflare]="wrangler --version 2>/dev/null"
   [claude-code]="claude --version 2>/dev/null"
+  [docker]="docker --version"
+  [terraform]="terraform --version 2>/dev/null | head -1"
+  [kubectl]="kubectl version --client --short 2>/dev/null || kubectl version --client 2>/dev/null | head -1"
   [whisperflow]="whisperflow --version 2>/dev/null"
   [tabby]=""
 )
@@ -159,7 +176,7 @@ tool_install() {
           ;;
       esac
       ;;
-    wrangler)
+    cloudflare)
       npm install -g wrangler
       ;;
     claude-code)
@@ -185,6 +202,82 @@ tool_install() {
           sudo dpkg -i /tmp/tabby.deb || sudo apt-get install -f -y
           rm -f /tmp/tabby.deb
           ;;
+      esac
+      ;;
+    python)
+      case "$BD_PKG_MGR" in
+        brew)   brew install python@3 ;;
+        apt)    sudo apt-get install -y python3 python3-pip python3-venv ;;
+        dnf)    sudo dnf install -y python3 python3-pip ;;
+        pacman) sudo pacman -S --noconfirm python python-pip ;;
+      esac
+      ;;
+    java)
+      case "$BD_PKG_MGR" in
+        brew)   brew install openjdk ;;
+        apt)    sudo apt-get install -y default-jdk ;;
+        dnf)    sudo dnf install -y java-latest-openjdk-devel ;;
+        pacman) sudo pacman -S --noconfirm jdk-openjdk ;;
+      esac
+      ;;
+    bun)
+      curl -fsSL https://bun.sh/install | bash
+      export PATH="$HOME/.bun/bin:$PATH"
+      ;;
+    rust)
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      source "$HOME/.cargo/env" 2>/dev/null || export PATH="$HOME/.cargo/bin:$PATH"
+      ;;
+    cpp)
+      case "$BD_OS" in
+        macos)
+          xcode-select --install 2>/dev/null || log_info "Xcode CLI tools already installed"
+          ;;
+        linux)
+          case "$BD_PKG_MGR" in
+            apt)    sudo apt-get install -y build-essential ;;
+            dnf)    sudo dnf groupinstall -y "Development Tools" ;;
+            pacman) sudo pacman -S --noconfirm base-devel ;;
+          esac
+          ;;
+      esac
+      ;;
+    docker)
+      case "$BD_OS" in
+        macos)
+          brew install --cask docker
+          ;;
+        linux)
+          case "$BD_PKG_MGR" in
+            apt)    curl -fsSL https://get.docker.com | sh && sudo usermod -aG docker "$USER" ;;
+            dnf)    sudo dnf install -y dnf-plugins-core && sudo dnf install -y docker-ce docker-ce-cli containerd.io && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER" ;;
+            pacman) sudo pacman -S --noconfirm docker && sudo systemctl enable --now docker && sudo usermod -aG docker "$USER" ;;
+          esac
+          ;;
+      esac
+      ;;
+    terraform)
+      case "$BD_PKG_MGR" in
+        brew) brew install terraform ;;
+        apt)
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
+          sudo apt-get update -qq && sudo apt-get install -y terraform
+          ;;
+        dnf)  sudo dnf install -y terraform ;;
+        pacman) sudo pacman -S --noconfirm terraform ;;
+      esac
+      ;;
+    kubectl)
+      case "$BD_PKG_MGR" in
+        brew) brew install kubectl ;;
+        apt)
+          curl -fsSL "https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')/kubectl" -o /tmp/kubectl
+          sudo install -o root -g root -m 0755 /tmp/kubectl /usr/local/bin/kubectl
+          rm -f /tmp/kubectl
+          ;;
+        dnf) sudo dnf install -y kubectl ;;
+        pacman) sudo pacman -S --noconfirm kubectl ;;
       esac
       ;;
     *)

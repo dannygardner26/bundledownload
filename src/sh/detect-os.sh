@@ -1,5 +1,5 @@
 # OS Detection
-# Sets: BD_OS (macos|linux), BD_ARCH (arm64|x86_64), BD_DISTRO (debian|fedora|arch|unknown), BD_PKG_MGR (brew|apt|dnf|pacman)
+# Sets: BD_OS, BD_ARCH, BD_DISTRO, BD_PKG_MGR, BD_CPU_CORES, BD_MEM_GB, BD_SHELL
 
 detect_os() {
   local uname_s
@@ -11,16 +11,22 @@ detect_os() {
       BD_OS="macos"
       BD_DISTRO="macos"
       BD_PKG_MGR="brew"
+      BD_CPU_CORES=$(sysctl -n hw.ncpu 2>/dev/null || echo "?")
+      BD_MEM_GB=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 ))
       ;;
     Linux)
       BD_OS="linux"
+      BD_CPU_CORES=$(nproc 2>/dev/null || grep -c ^processor /proc/cpuinfo 2>/dev/null || echo "?")
+      BD_MEM_GB=$(( $(grep MemTotal /proc/meminfo 2>/dev/null | awk '{print $2}' || echo 0) / 1048576 ))
       if [ -f /etc/os-release ]; then
         . /etc/os-release
         case "$ID" in
-          ubuntu|debian|pop|mint|elementary) BD_DISTRO="debian"; BD_PKG_MGR="apt" ;;
-          fedora|rhel|centos|rocky|alma)     BD_DISTRO="fedora"; BD_PKG_MGR="dnf" ;;
-          arch|manjaro|endeavouros)          BD_DISTRO="arch";   BD_PKG_MGR="pacman" ;;
-          *)                                 BD_DISTRO="unknown"; BD_PKG_MGR="unknown" ;;
+          ubuntu|debian|pop|mint|elementary|linuxmint|neon) BD_DISTRO="debian"; BD_PKG_MGR="apt" ;;
+          fedora|rhel|centos|rocky|alma|ol|amzn)            BD_DISTRO="fedora"; BD_PKG_MGR="dnf" ;;
+          arch|manjaro|endeavouros|garuda|artix)             BD_DISTRO="arch";   BD_PKG_MGR="pacman" ;;
+          opensuse*|sles)                                    BD_DISTRO="suse";   BD_PKG_MGR="zypper" ;;
+          alpine)                                            BD_DISTRO="alpine"; BD_PKG_MGR="apk" ;;
+          *)                                                 BD_DISTRO="unknown"; BD_PKG_MGR="unknown" ;;
         esac
       else
         BD_DISTRO="unknown"
@@ -31,6 +37,8 @@ detect_os() {
       BD_OS="windows"
       BD_DISTRO="windows"
       BD_PKG_MGR="winget"
+      BD_CPU_CORES=$(nproc 2>/dev/null || echo "?")
+      BD_MEM_GB="?"
       log_warn "Detected Windows via Git Bash. For best results, use install.ps1 in PowerShell."
       ;;
     *)
@@ -38,6 +46,8 @@ detect_os() {
       exit 1
       ;;
   esac
+
+  BD_SHELL="$(basename "${SHELL:-unknown}")"
 }
 
 ensure_package_manager() {
@@ -73,5 +83,6 @@ print_system_info() {
   if command_exists "$BD_PKG_MGR"; then
     printf " — %s available" "$BD_PKG_MGR"
   fi
-  printf "${RESET}\n\n"
+  printf "${RESET}\n"
+  printf " ${DIM}System:   %s cores, %sGB RAM, shell: %s${RESET}\n\n" "$BD_CPU_CORES" "$BD_MEM_GB" "$BD_SHELL"
 }
